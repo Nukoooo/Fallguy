@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -102,7 +101,7 @@ internal unsafe class AFK(Configuration configuration) : IUiModule
 
         ImGui.TextUnformatted("注意事项:");
         ImGui.TextUnformatted("自动确认进本需要自行解决");
-        ImGui.TextUnformatted("如果和互动失败会自动关闭");
+        ImGui.TextUnformatted("如果和目标互动失败会自动关闭");
     }
 
     private void hk_PublicContentFallGuyUpdate(nint a1, int type, uint a3, uint a4, uint a5)
@@ -134,8 +133,6 @@ internal unsafe class AFK(Configuration configuration) : IUiModule
         {
             return;
         }
-
-        Task.Run(() => { Task.Delay(configuration.Delay); });
 
         DalamudApi.Framework.RunOnTick(() => { _leaveDungeon(1); },
                                        TimeSpan.FromMilliseconds(configuration.Delay));

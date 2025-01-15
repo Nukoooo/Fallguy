@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -87,6 +88,18 @@ internal unsafe class AFK(Configuration configuration) : IUiModule
             configuration.Save();
         }
 
+        ImGui.BeginDisabled(!configuration.Enabled);
+
+        var delay = configuration.Delay;
+
+        if (ImGui.SliderInt("退本延迟(毫秒)", ref delay, 0, 5000))
+        {
+            configuration.Delay = delay;
+            configuration.Save();
+        }
+
+        ImGui.EndDisabled();
+
         ImGui.TextUnformatted("注意事项:");
         ImGui.TextUnformatted("自动确认进本需要自行解决");
         ImGui.TextUnformatted("如果和互动失败会自动关闭");
@@ -122,7 +135,10 @@ internal unsafe class AFK(Configuration configuration) : IUiModule
             return;
         }
 
-        _leaveDungeon(1);
+        Task.Run(() => { Task.Delay(configuration.Delay); });
+
+        DalamudApi.Framework.RunOnTick(() => { _leaveDungeon(1); },
+                                       TimeSpan.FromMilliseconds(configuration.Delay));
 
         /*var stage   = a3 >> 28;*/
         DalamudApi.PluginLog.Info($"Status: {status}, a1 + 0x1178: {*(int*) (a1   + 0x1178)}");

@@ -1,6 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Hooking;
 using FallGuy.Extensions;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
@@ -72,16 +76,19 @@ internal unsafe class TargetInfo(Configuration configuration) : IUiModule
 
         if (ImGui.Checkbox("启用##目标信息", ref enabled))
         {
+            configuration.Enabled = enabled;
+
             if (enabled)
             {
                 LookUpAndInteractWithObject();
             }
 
-            configuration.Enabled = enabled;
             configuration.Save();
         }
 
+        ImGui.TextUnformatted("注意事项:");
         ImGui.TextUnformatted("自动确认进本需要自行解决");
+        ImGui.TextUnformatted("如果和互动失败会自动关闭");
     }
 
     private void hk_PublicContentFallGuyUpdate(nint a1, int type, uint a3, uint a4, uint a5)
@@ -127,14 +134,36 @@ internal unsafe class TargetInfo(Configuration configuration) : IUiModule
 
         var targetSystem = TargetSystem.Instance();
 
-        if (targetObj == null || !targetSystem->IsObjectInViewRange((GameObject*) targetObj.Address))
+        if (targetObj == null
+            || DalamudApi.ClientState.LocalPlayer is not { } local
+            || Math.Sqrt(Math.Pow(local.Position.X   - targetObj.Position.X, 2)
+                         + Math.Pow(local.Position.Z - targetObj.Position.Z, 2))
+            > 26.999)
         {
             configuration.Enabled = false;
-            configuration.Save();
+
+            Print("和目标《节目登记员》交互失败。找不到目标或者不在交互范围内，已自动关闭");
 
             return;
         }
 
-        targetSystem->InteractWithObject((GameObject*) targetObj.Address);
+        targetSystem->InteractWithObject((GameObject*) targetObj.Address, false);
+    }
+
+    private static void Print(string text)
+    {
+        var payloads = new List<Payload>
+        {
+            new UIForegroundPayload(1),
+            new TextPayload("["),
+            new UIForegroundPayload(35),
+            new TextPayload("糖豆人挂机"),
+            new UIForegroundPayload(0),
+            new TextPayload("] "),
+            new TextPayload(text),
+            new UIForegroundPayload(0),
+        };
+
+        DalamudApi.ChatGui.Print(new SeString(payloads));
     }
 }

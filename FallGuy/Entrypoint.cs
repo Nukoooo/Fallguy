@@ -57,7 +57,7 @@ public sealed class EntryPoint : IDalamudPlugin
     private void ConfigureServices(IServiceCollection services)
     {
         services.ImplSingleton<IModule, ICommandHandler, CommandHandler>();
-        services.AddSingleton<IUiModule, TargetInfo>();
+        services.AddSingleton<IUiModule, AFK>();
     }
 
     private void InitModule<T>() where T : IModule

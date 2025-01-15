@@ -9,11 +9,12 @@ using Dalamud.Hooking;
 using FallGuy.Extensions;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using ImGuiNET;
 
 namespace FallGuy.Modules;
 
-internal unsafe class TargetInfo(Configuration configuration) : IUiModule
+internal unsafe class AFK(Configuration configuration) : IUiModule
 {
     private LeaveDutyDelegate _leaveDungeon;
 
@@ -143,6 +144,10 @@ internal unsafe class TargetInfo(Configuration configuration) : IUiModule
             configuration.Enabled = false;
 
             Print("和目标《节目登记员》交互失败。找不到目标或者不在交互范围内，已自动关闭");
+
+            UIGlobals.PlayChatSoundEffect(6);
+            UIGlobals.PlayChatSoundEffect(6);
+            UIGlobals.PlayChatSoundEffect(6);
 
             return;
         }

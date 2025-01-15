@@ -122,7 +122,7 @@ internal unsafe class AFK(Configuration configuration) : IUiModule
             return;
         }
 
-        _leaveDungeon(0);
+        _leaveDungeon(1);
 
         /*var stage   = a3 >> 28;*/
         DalamudApi.PluginLog.Info($"Status: {status}, a1 + 0x1178: {*(int*) (a1   + 0x1178)}");
